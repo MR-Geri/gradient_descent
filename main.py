@@ -9,11 +9,11 @@ from visual import *
 
 
 def f(w, extra=[]):
-    return np.sum(w*w)
+    return np.sum(w * w)
 
 
 def grad(w, extra=[]):
-    return 2*w
+    return 2 * w
 
 
 def visualize_learning(w_history):
@@ -40,7 +40,7 @@ def visualize_learning(w_history):
 def solve_fw():
     rand = np.random.RandomState(19)
     w_init = rand.uniform(-10, 10, 2)
-    fig, _ = plt.subplots(nrows=4, ncols=4, figsize=(18, 12))
+    fig, _ = plt.subplots(nrows=4, ncols=4, figsize=(18 * 3, 12 * 3))
     learning_rates = [0.05, 0.2, 0.5, 0.8]
     momentum = [0, 0.5, 0.9]
     ind = 1
@@ -50,7 +50,7 @@ def solve_fw():
         for eta, col in zip(learning_rates, [0, 1, 2, 3]):
             plt.subplot(3, 4, ind)
             w_history, _ = gradient_descent(
-                5, -1, w_init, f, grad, None, eta, alpha)
+                5, -1, w_init.copy(), f, grad, [], eta, alpha)
 
             visualize_learning(w_history)
             ind += 1

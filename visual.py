@@ -11,8 +11,6 @@ def visualize_fw():
     pts = pts.transpose()
 
     f_vals = np.sum(pts * pts, axis=1)
-#    function_plot(pts, f_vals)
-#    plt.show()
     return pts, f_vals
 
 
@@ -36,3 +34,6 @@ def function_plot(pts, f_val):
 
 if __name__ == '__main__':
     pts, f_vals = visualize_fw()
+    function_plot(pts, f_vals)
+    plt.show()
+

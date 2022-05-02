@@ -5,15 +5,16 @@ from sklearn.model_selection import train_test_split
 
 from gradient import gradient_descent
 from visual import *
-from functions import func, grad, mse, grad_mse, error
+from functions import func, grad, mse, grad_mse, error, hesse
+from newton import newton_func
 
 
-def visualize_learning(w_history):
-    function_plot(pts, f_vals)
+def draw_one_graph(w_history, pts, f_vals):
+    draw_plot(pts, f_vals)
 
     plt.plot(w_history[:, 0], w_history[:, 1], marker='o', c='magenta')
 
-    annotate_pt('минимум', w_history[-1], (-1, 7), 'green')
+    draw_arrowprops('минимум', w_history[-1], (-1, 7), 'green')
     for i, w in enumerate(w_history[:-1]):
         plt.annotate(
             "",
@@ -28,9 +29,10 @@ def solve_fw():
     rand = np.random.RandomState(19)
     w = rand.uniform(-10, 10, 2)
     fig, _ = plt.subplots(nrows=4, ncols=4, figsize=(54, 54))
-    learning_rates = [.05, .3, .5, .9]
+    learning_rates = [.05, .3, .7, .9]
     momentum = [0, .2, .7]
     ind = 1
+    pts, f_vals = init_graph()
 
     for alpha in momentum:
         for col, rate in enumerate(learning_rates):
@@ -45,11 +47,51 @@ def solve_fw():
                 momentum=alpha
             )
 
-            visualize_learning(w_history)
+            draw_one_graph(w_history, pts, f_vals)
             ind += 1
             plt.text(-9, 12, f'Скорость = {rate}', fontsize=13)
             if col == 1:
                 plt.text(10, 15, f'Импульс = {alpha}', fontsize=20)
+
+    fig.subplots_adjust(hspace=.5, wspace=.3)
+    plt.show()
+
+
+def solve_fw_newton():
+    rand = np.random.RandomState(19)
+    w = rand.uniform(-10, 10, 2)
+    fig, _ = plt.subplots(nrows=4, ncols=4, figsize=(54, 54))
+    learning_rates = [.05, .3, .7, .9]
+    ind = 1
+    pts, f_vals = init_graph()
+
+    for rate in learning_rates:
+        plt.subplot(2, 4, ind)
+        w_history, _ = gradient_descent(
+            max_iterations=10, 
+            threshold=-1, 
+            w=w.copy(), 
+            obj_func=func, 
+            grad_func=grad, 
+            learning_rate=rate, 
+            momentum=.5
+        )
+        draw_one_graph(w_history, pts, f_vals)
+        plt.subplot(2, 4, ind+1)
+        w_history, _ = newton_func(
+            max_iterations=10,
+            threshold=-1,
+            w=w.copy(),
+            obj_func=func, 
+            grad_func=grad,
+            hesse_func=hesse,
+            learning_rate=rate 
+        )
+        draw_one_graph(w_history, pts, f_vals)
+        ind += 2
+        plt.text(-39, 12, f'Градиент', fontsize=13)
+        plt.text(-3, 12, f'Ньютон', fontsize=13)
+        plt.text(-25, 15, f'Скорость = {rate}', fontsize=13)
 
     fig.subplots_adjust(hspace=.5, wspace=.3)
     plt.show()
@@ -74,14 +116,14 @@ def main(flag_show_data: bool = False):
             subplot_kw={"xticks": [], "yticks": [] }
         )
         for i in np.arange(10):
-            ax[i].imshow(digits[i, :].reshape(8, 8))
+            ax[i].imshow(digits[i].reshape(8, 8))
         plt.show()
 
     fig, ax = plt.subplots(nrows=3, ncols=1, figsize=(12, 4))
-    for ind, alpha in enumerate((0, .5, .9)):
-        w_history, mse_history = gradient_descent(
+    for ind, alpha in enumerate((0, .7, .9)):
+        w_history, y_history = gradient_descent(
             max_iterations=100,
-            threshold=1e-2,
+            threshold=1e-4,
             w=w,
             obj_func=mse,
             grad_func=grad_mse,
@@ -91,22 +133,23 @@ def main(flag_show_data: bool = False):
         )
 
         plt.subplot(131 + ind)
-        plt.plot(np.arange(mse_history.size), mse_history, color='green')
-        plt.xlabel('Iteration')
-        plt.ylabel('Mean Square Error')
+        plt.plot(np.arange(y_history.size), y_history, color='green')
+        if ind == 1:
+            plt.xlabel('Итерация')
+        if ind == 0:
+            plt.ylabel('Среднеквадратичная ошибка')
 
-        plt.title(f'Momentum = {alpha}\nIter={mse_history.size - 1}')
+        plt.title(f'Импульс = {alpha}\n')
 
         train_error = error(w_history[-1], (x_train, y_train))
         test_error = error(w_history[-1], (x_test, y_test))
 
-        print(f"Train Error Rate: {train_error}")
-        print(f"Test Error Rate: {test_error}\n")
+        print(f"Ошибка по отношению к обучающим данным: {train_error}")
+        print(f"Ошибка по отношению к тестовым данным: {test_error}\n")
     plt.show()
 
 
 if __name__ == '__main__':
-    pts, f_vals = visualize_fw()
-    solve_fw()
+    solve_fw_newton()
 #    main(True)
 

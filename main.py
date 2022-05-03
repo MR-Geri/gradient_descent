@@ -69,7 +69,7 @@ def solve_fw_newton():
         plt.subplot(2, 4, ind)
         w_history, _ = gradient_descent(
             max_iterations=10, 
-            threshold=-1, 
+            threshold=1e-2, 
             w=w.copy(), 
             obj_func=func, 
             grad_func=grad, 
@@ -80,7 +80,7 @@ def solve_fw_newton():
         plt.subplot(2, 4, ind+1)
         w_history, _ = newton_func(
             max_iterations=10,
-            threshold=-1,
+            threshold=1e-2,
             w=w.copy(),
             obj_func=func, 
             grad_func=grad,
@@ -150,6 +150,6 @@ def main(flag_show_data: bool = False):
 
 
 if __name__ == '__main__':
-    solve_fw_newton()
-#    main(True)
+#    solve_fw_newton()
+    main(True)
 

@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 
 from gradient import gradient_descent
 from visual import *
-from functions import func, grad, mse, grad_mse, error, hesse
+from functions import func, grad, mse, grad_mse, error, hesse, hesse_mse
 from newton import newton_func
 
 
@@ -119,10 +119,10 @@ def main(flag_show_data: bool = False):
             ax[i].imshow(digits[i].reshape(8, 8))
         plt.show()
 
-    fig, ax = plt.subplots(nrows=3, ncols=1, figsize=(12, 4))
+    fig, ax = plt.subplots(nrows=3, ncols=2, figsize=(12, 4))
     for ind, alpha in enumerate((0, .7, .9)):
         w_history, y_history = gradient_descent(
-            max_iterations=100,
+            max_iterations=10,
             threshold=1e-4,
             w=w,
             obj_func=mse,
@@ -131,9 +131,20 @@ def main(flag_show_data: bool = False):
             momentum=alpha,
             params=(x_train, y_train)
         )
-
         plt.subplot(131 + ind)
         plt.plot(np.arange(y_history.size), y_history, color='green')
+        w_history, y_history = newton_func(
+            max_iterations=10,
+            threshold=1e-4,
+            w=w,
+            obj_func=mse, 
+            grad_func=grad_mse,
+            hesse_func=hesse_mse,
+            learning_rate=1e-6,
+            params=(x_train, y_train)
+        )
+
+        plt.plot(np.arange(y_history.size), y_history, color='red')
         if ind == 1:
             plt.xlabel('Итерация')
         if ind == 0:

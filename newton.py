@@ -18,12 +18,12 @@ def newton_func(
     i, diff = 0, 1e10
 
     while i < max_iterations and diff > threshold:
-        hesse = hesse_func(w)
+        hesse = hesse_func(w, params)
         if is_pos_def(hesse):
             hesse_inverse = np.linalg.inv(hesse)
-            w -= learning_rate * np.dot(hesse_inverse, grad_func(w))
+            w -= learning_rate * np.dot(hesse_inverse, grad_func(w, params))
         else:
-            w -= learning_rate * grad_func(w)
+            w -= learning_rate * grad_func(w, params)
 
         w_history = np.vstack((w_history, w))
         f_history = np.vstack((f_history, obj_func(w, params)))

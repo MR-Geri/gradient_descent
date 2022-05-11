@@ -18,7 +18,7 @@ def grad_mse(w, xy):
     rows, cols = x.shape
 
     o = np.sum(x*w, axis=1)
-    diff = y-o
+    diff = y - o
     diff = np.tile(diff.reshape((rows, 1)), (1, cols))
     grad = -np.sum(diff*x, axis=0)
     return grad
@@ -40,3 +40,4 @@ def error(w, xy):
     o[ind_0] = 0
     o[ind_1] = 1
     return np.sum((o - y) * (o - y)) / y.size * 100
+

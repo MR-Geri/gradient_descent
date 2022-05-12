@@ -32,10 +32,10 @@ def mse(w, xy):
 
 def hesse_mse(w, xy):
     x, y = xy
-    ab = -np.sum(-x)
+    ab = -2 * np.sum(-x) / len(x)
     return np.array((
-        (-1 ** (len(x) % 2), ab),
-        (ab, np.sum(x**2))
+        (2, ab),
+        (ab, -2 * np.sum(x**2) / len(x))
     ))
 
 

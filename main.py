@@ -122,9 +122,9 @@ def main(flag_show_data: bool = False):
     fig, ax = plt.subplots(nrows=3, ncols=2, figsize=(12, 4))
     for ind, alpha in enumerate((0, .7, .9)):
         w_history, y_history = gradient_descent(
-            max_iterations=10,
+            max_iterations=100,
             threshold=1e-4,
-            w=w,
+            w=w.copy(),
             obj_func=mse,
             grad_func=grad_mse,
             learning_rate=1e-6,
@@ -134,9 +134,9 @@ def main(flag_show_data: bool = False):
         plt.subplot(131 + ind)
         plt.plot(np.arange(y_history.size), y_history, color='green')
         w_history, y_history = newton_func(
-            max_iterations=10,
+            max_iterations=100,
             threshold=1e-4,
-            w=w,
+            w=w.copy(),
             obj_func=mse, 
             grad_func=grad_mse,
             hesse_func=hesse_mse,

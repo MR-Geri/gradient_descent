@@ -101,7 +101,7 @@ def main(flag_show_data: bool = False):
         )
         plt.subplot(131 + ind)
         plt.plot(np.arange(y_history.size), y_history, color='green', 
-                 label='gradient')
+                 label='Градиент')
 
         w_history, y_history = newton_func(
             max_iterations=100,
@@ -114,7 +114,7 @@ def main(flag_show_data: bool = False):
             params=(x_train, y_train)
         )
         plt.plot(np.arange(y_history.size), y_history, color='red', 
-                 label='newton')
+                 label='Ньютон')
         plt.legend()
         if ind == 1:
             plt.xlabel('Итерация')
@@ -126,6 +126,6 @@ def main(flag_show_data: bool = False):
 
 
 if __name__ == '__main__':
-#    solve_fw_newton()
-    main(True)
+    solve_fw_newton()
+#    main(True)
 

@@ -10,7 +10,7 @@ def grad(w, extra=None):
 
 
 def hesse(w, extra=None):
-    return np.array(((2, 0), (0, 2)))
+    return np.array(((2, 0), (0, 2))).transpose()
 
 
 def grad_mse(w, xy):
@@ -36,16 +36,5 @@ def hesse_mse(w, xy):
     return np.array((
         (2, ab),
         (ab, -2 * np.sum(x**2) / len(x))
-    ))
-
-
-def error(w, xy):
-#    print(w, xy)
-    x, y = xy
-    o = np.sum(x * w, axis=1)
-
-    ind_0, ind_1 = np.where(o <= .5), np.where(o > .5)
-    o[ind_0] = 0
-    o[ind_1] = 1
-    return np.sum((o - y) * (o - y)) / y.size * 100
+    )).transpose()
 

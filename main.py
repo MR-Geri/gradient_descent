@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 
 from gradient import gradient_descent
 from visual import *
-from functions import func, grad, mse, grad_mse, error, hesse, hesse_mse
+from functions import func, grad, mse, grad_mse, hesse, hesse_mse
 from newton import newton_func
 
 
@@ -23,38 +23,6 @@ def draw_one_graph(w_history, pts, f_vals):
                 "arrowstyle": '<-',
                 "connectionstyle": 'angle3'
             })
-
-
-def solve_fw():
-    rand = np.random.RandomState(19)
-    w = rand.uniform(-10, 10, 2)
-    fig, _ = plt.subplots(nrows=4, ncols=4, figsize=(54, 54))
-    learning_rates = [.05, .3, .7, .9]
-    momentum = [0, .2, .7]
-    ind = 1
-    pts, f_vals = init_graph()
-
-    for alpha in momentum:
-        for col, rate in enumerate(learning_rates):
-            plt.subplot(3, 4, ind)
-            w_history, _ = gradient_descent(
-                max_iterations=10, 
-                threshold=-1, 
-                w=w.copy(), 
-                obj_func=func, 
-                grad_func=grad, 
-                learning_rate=rate, 
-                momentum=alpha
-            )
-
-            draw_one_graph(w_history, pts, f_vals)
-            ind += 1
-            plt.text(-9, 12, f'Скорость = {rate}', fontsize=13)
-            if col == 1:
-                plt.text(10, 15, f'Импульс = {alpha}', fontsize=20)
-
-    fig.subplots_adjust(hspace=.5, wspace=.3)
-    plt.show()
 
 
 def solve_fw_newton():
@@ -119,7 +87,7 @@ def main(flag_show_data: bool = False):
             ax[i].imshow(digits[i].reshape(8, 8))
         plt.show()
 
-    fig, ax = plt.subplots(nrows=3, ncols=2, figsize=(12, 4))
+    fig, ax = plt.subplots(nrows=3, ncols=1, figsize=(12, 4))
     for ind, alpha in enumerate((0, .7, .9)):
         w_history, y_history = gradient_descent(
             max_iterations=100,
@@ -132,7 +100,9 @@ def main(flag_show_data: bool = False):
             params=(x_train, y_train)
         )
         plt.subplot(131 + ind)
-        plt.plot(np.arange(y_history.size), y_history, color='green')
+        plt.plot(np.arange(y_history.size), y_history, color='green', 
+                 label='gradient')
+
         w_history, y_history = newton_func(
             max_iterations=100,
             threshold=1e-4,
@@ -143,20 +113,15 @@ def main(flag_show_data: bool = False):
             learning_rate=1e-6,
             params=(x_train, y_train)
         )
-
-        plt.plot(np.arange(y_history.size), y_history, color='red')
+        plt.plot(np.arange(y_history.size), y_history, color='red', 
+                 label='newton')
+        plt.legend()
         if ind == 1:
             plt.xlabel('Итерация')
         if ind == 0:
             plt.ylabel('Среднеквадратичная ошибка')
 
         plt.title(f'Импульс = {alpha}\n')
-
-        train_error = error(w_history[-1], (x_train, y_train))
-        test_error = error(w_history[-1], (x_test, y_test))
-
-        print(f"Ошибка по отношению к обучающим данным: {train_error}")
-        print(f"Ошибка по отношению к тестовым данным: {test_error}\n")
     plt.show()
 
 

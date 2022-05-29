@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.widgets import Slider
 import sklearn.datasets as dt
 from sklearn.model_selection import train_test_split
 
@@ -65,7 +66,46 @@ def solve_fw_newton():
     plt.show()
 
 
+def show_main_graph(ax, w, momentum, learning_rate, params):
+    ax.clear()
+    _, y_history = gradient_descent(
+        max_iterations=100,
+        threshold=1e-4,
+        w=w.copy(),
+        obj_func=mse,
+        grad_func=grad_mse,
+        learning_rate=learning_rate,
+        momentum=momentum,
+        params=params
+    )
+    ax.plot(np.arange(y_history.size), y_history, color='green', 
+            label='Градиент')
+
+    _, y_history = newton_func(
+        max_iterations=100,
+        threshold=1e-4,
+        w=w.copy(),
+        obj_func=mse, 
+        grad_func=grad_mse,
+        hesse_func=hesse_mse,
+        learning_rate=learning_rate,
+        params=params
+    )
+    ax.plot(np.arange(y_history.size), y_history, color='red', 
+             label='Ньютон')
+    ax.legend()
+
+
+
 def main(flag_show_data: bool = False):
+    def update_slider(tmp_value) -> None:
+        for i in range(3):
+            ax[i].clear()
+
+        show_main_graph(ax[0], w.copy(), 0.7, s1.val, (x_train, y_train))
+        show_main_graph(ax[1], w.copy(), 0.7, s2.val, (x_train, y_train))
+        show_main_graph(ax[2], w.copy(), 0.7, s3.val, (x_train, y_train))
+
     digits, target = dt.load_digits(n_class=2, return_X_y=True)
 
     x_train, x_test, y_train, y_test = train_test_split(
@@ -87,45 +127,30 @@ def main(flag_show_data: bool = False):
             ax[i].imshow(digits[i].reshape(8, 8))
         plt.show()
 
-    fig, ax = plt.subplots(nrows=3, ncols=1, figsize=(12, 4))
-    for ind, alpha in enumerate((0, .7, .9)):
-        w_history, y_history = gradient_descent(
-            max_iterations=100,
-            threshold=1e-4,
-            w=w.copy(),
-            obj_func=mse,
-            grad_func=grad_mse,
-            learning_rate=1e-6,
-            momentum=alpha,
-            params=(x_train, y_train)
-        )
-        plt.subplot(131 + ind)
-        plt.plot(np.arange(y_history.size), y_history, color='green', 
-                 label='Градиент')
+#    fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(12, 4))
+    fig, ax = plt.subplot_mosaic([
+        [0, 1, 2, 3], [0, 1, 2, 4], [0, 1, 2, 5]
+    ])
 
-        w_history, y_history = newton_func(
-            max_iterations=100,
-            threshold=1e-4,
-            w=w.copy(),
-            obj_func=mse, 
-            grad_func=grad_mse,
-            hesse_func=hesse_mse,
-            learning_rate=1e-6,
-            params=(x_train, y_train)
-        )
-        plt.plot(np.arange(y_history.size), y_history, color='red', 
-                 label='Ньютон')
-        plt.legend()
+    for ind, momentum in enumerate((0, .7, .9)):
+        show_main_graph(ax[ind], w.copy(), momentum, 1e-6, (x_train, y_train))
         if ind == 1:
-            plt.xlabel('Итерация')
+            ax[ind].set_xlabel('Итерация')
         if ind == 0:
-            plt.ylabel('Среднеквадратичная ошибка')
+            ax[ind].set_ylabel('Среднеквадратичная ошибка')
 
-        plt.title(f'Импульс = {alpha}\n')
+        ax[ind].set_title(f'Импульс = {momentum}\n')
+
+    s1 = Slider(ax[3], '[1]', 1e-9, 1e-6, 1e-6)
+    s2 = Slider(ax[4], '[2]', 1e-9, 1e-6, 1e-6)
+    s3 = Slider(ax[5], '[3]', 1e-9, 1e-6, 1e-6)
+    s1.on_changed(update_slider)
+    s2.on_changed(update_slider)
+    s3.on_changed(update_slider)
     plt.show()
 
 
 if __name__ == '__main__':
 #    solve_fw_newton()
-    main(True)
+    main(False)
 

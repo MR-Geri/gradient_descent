@@ -30,11 +30,13 @@ def mse(w, xy):
     mse = np.sum((y-o)**2)
     return mse/2
 
+
 def hesse_mse(w, xy):
     x, y = xy
-    ab = -2 * np.sum(-x) / len(x)
+    o = np.sum(x*w, axis=1)
+    ab = 2 * np.sum(x) / len(x)
     return np.array((
         (2, ab),
-        (ab, -2 * np.sum(x**2) / len(x))
+        (ab, 2 * np.sum(x**2) / len(x))
     )).transpose()
 

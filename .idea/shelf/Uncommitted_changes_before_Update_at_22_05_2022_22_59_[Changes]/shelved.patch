@@ -1,0 +1,151 @@
+Index: main.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import numpy as np\r\nimport matplotlib.pyplot as plt\r\nimport sklearn.datasets as dt\r\nfrom sklearn.model_selection import train_test_split\r\n\r\nfrom gradient import gradient_descent\r\nfrom visual import *\r\nfrom functions import func, grad, mse, grad_mse, hesse, hesse_mse\r\nfrom newton import newton_func\r\n\r\n\r\ndef draw_one_graph(w_history, pts, f_vals):\r\n    draw_plot(pts, f_vals)\r\n\r\n    plt.plot(w_history[:, 0], w_history[:, 1], marker='o', c='magenta')\r\n\r\n    draw_arrowprops('минимум', w_history[-1], (-1, 7), 'green')\r\n    for i, w in enumerate(w_history[:-1]):\r\n        plt.annotate(\r\n            \"\",\r\n            xy=w, xycoords='data', xytext=w_history[i+1, :], textcoords='data',\r\n            arrowprops={\r\n                \"arrowstyle\": '<-',\r\n                \"connectionstyle\": 'angle3'\r\n            })\r\n\r\n\r\ndef solve_fw_newton():\r\n    rand = np.random.RandomState(19)\r\n    w = rand.uniform(-10, 10, 2)\r\n    fig, _ = plt.subplots(nrows=4, ncols=4, figsize=(54, 54))\r\n    learning_rates = [.05, .3, .7, .9]\r\n    ind = 1\r\n    pts, f_vals = init_graph()\r\n\r\n    for rate in learning_rates:\r\n        plt.subplot(2, 4, ind)\r\n        w_history, _ = gradient_descent(\r\n            max_iterations=10, \r\n            threshold=1e-2, \r\n            w=w.copy(), \r\n            obj_func=func, \r\n            grad_func=grad, \r\n            learning_rate=rate, \r\n            momentum=.5\r\n        )\r\n        draw_one_graph(w_history, pts, f_vals)\r\n        plt.subplot(2, 4, ind+1)\r\n        w_history, _ = newton_func(\r\n            max_iterations=10,\r\n            threshold=1e-2,\r\n            w=w.copy(),\r\n            obj_func=func, \r\n            grad_func=grad,\r\n            hesse_func=hesse,\r\n            learning_rate=rate \r\n        )\r\n        draw_one_graph(w_history, pts, f_vals)\r\n        ind += 2\r\n        plt.text(-39, 12, f'Градиент', fontsize=13)\r\n        plt.text(-3, 12, f'Ньютон', fontsize=13)\r\n        plt.text(-25, 15, f'Скорость = {rate}', fontsize=13)\r\n\r\n    fig.subplots_adjust(hspace=.5, wspace=.3)\r\n    plt.show()\r\n\r\n\r\ndef main(flag_show_data: bool = False):\r\n    digits, target = dt.load_digits(n_class=2, return_X_y=True)\r\n\r\n    x_train, x_test, y_train, y_test = train_test_split(\r\n        digits, target, test_size=.2, random_state=10\r\n    )\r\n\r\n    x_train = np.hstack((np.ones((len(y_train), 1)), x_train))\r\n    x_test = np.hstack((np.ones((len(y_test), 1)), x_test))\r\n\r\n    rand = np.random.RandomState(19)\r\n    w = rand.uniform(-1, 1, x_train.shape[1]) * 1e-6\r\n\r\n    if flag_show_data:\r\n        fig, ax = plt.subplots(\r\n            nrows=1, ncols=10, figsize=(12, 4), \r\n            subplot_kw={\"xticks\": [], \"yticks\": [] }\r\n        )\r\n        for i in np.arange(10):\r\n            ax[i].imshow(digits[i].reshape(8, 8))\r\n        plt.show()\r\n\r\n    fig, ax = plt.subplots(nrows=3, ncols=1, figsize=(12, 4))\r\n    for ind, alpha in enumerate((0, .7, .9)):\r\n        w_history, y_history = gradient_descent(\r\n            max_iterations=100,\r\n            threshold=1e-4,\r\n            w=w.copy(),\r\n            obj_func=mse,\r\n            grad_func=grad_mse,\r\n            learning_rate=1e-6,\r\n            momentum=alpha,\r\n            params=(x_train, y_train)\r\n        )\r\n        plt.subplot(131 + ind)\r\n        plt.plot(np.arange(y_history.size), y_history, color='green', \r\n                 label='Градиент')\r\n\r\n        w_history, y_history = newton_func(\r\n            max_iterations=100,\r\n            threshold=1e-4,\r\n            w=w.copy(),\r\n            obj_func=mse, \r\n            grad_func=grad_mse,\r\n            hesse_func=hesse_mse,\r\n            learning_rate=1e-6,\r\n            params=(x_train, y_train)\r\n        )\r\n        plt.plot(np.arange(y_history.size), y_history, color='red', \r\n                 label='Ньютон')\r\n        plt.legend()\r\n        if ind == 1:\r\n            plt.xlabel('Итерация')\r\n        if ind == 0:\r\n            plt.ylabel('Среднеквадратичная ошибка')\r\n\r\n        plt.title(f'Импульс = {alpha}\\n')\r\n    plt.show()\r\n\r\n\r\nif __name__ == '__main__':\r\n#    solve_fw_newton()\r\n    main(True)\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/main.py b/main.py
+--- a/main.py	(revision 5c403d919982901f32ab854681e908324d5f3e65)
++++ b/main.py	(date 1653249492870)
+@@ -1,131 +1,16 @@
+-import numpy as np
+-import matplotlib.pyplot as plt
+-import sklearn.datasets as dt
+-from sklearn.model_selection import train_test_split
+-
+-from gradient import gradient_descent
+-from visual import *
+-from functions import func, grad, mse, grad_mse, hesse, hesse_mse
+-from newton import newton_func
+-
+-
+-def draw_one_graph(w_history, pts, f_vals):
+-    draw_plot(pts, f_vals)
+-
+-    plt.plot(w_history[:, 0], w_history[:, 1], marker='o', c='magenta')
+-
+-    draw_arrowprops('минимум', w_history[-1], (-1, 7), 'green')
+-    for i, w in enumerate(w_history[:-1]):
+-        plt.annotate(
+-            "",
+-            xy=w, xycoords='data', xytext=w_history[i+1, :], textcoords='data',
+-            arrowprops={
+-                "arrowstyle": '<-',
+-                "connectionstyle": 'angle3'
+-            })
+-
+-
+-def solve_fw_newton():
+-    rand = np.random.RandomState(19)
+-    w = rand.uniform(-10, 10, 2)
+-    fig, _ = plt.subplots(nrows=4, ncols=4, figsize=(54, 54))
+-    learning_rates = [.05, .3, .7, .9]
+-    ind = 1
+-    pts, f_vals = init_graph()
++# This is a sample Python script.
+ 
+-    for rate in learning_rates:
+-        plt.subplot(2, 4, ind)
+-        w_history, _ = gradient_descent(
+-            max_iterations=10, 
+-            threshold=1e-2, 
+-            w=w.copy(), 
+-            obj_func=func, 
+-            grad_func=grad, 
+-            learning_rate=rate, 
+-            momentum=.5
+-        )
+-        draw_one_graph(w_history, pts, f_vals)
+-        plt.subplot(2, 4, ind+1)
+-        w_history, _ = newton_func(
+-            max_iterations=10,
+-            threshold=1e-2,
+-            w=w.copy(),
+-            obj_func=func, 
+-            grad_func=grad,
+-            hesse_func=hesse,
+-            learning_rate=rate 
+-        )
+-        draw_one_graph(w_history, pts, f_vals)
+-        ind += 2
+-        plt.text(-39, 12, f'Градиент', fontsize=13)
+-        plt.text(-3, 12, f'Ньютон', fontsize=13)
+-        plt.text(-25, 15, f'Скорость = {rate}', fontsize=13)
++# Press Shift+F10 to execute it or replace it with your code.
++# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+ 
+-    fig.subplots_adjust(hspace=.5, wspace=.3)
+-    plt.show()
+ 
++def print_hi(name):
++    # Use a breakpoint in the code line below to debug your script.
++    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+ 
+-def main(flag_show_data: bool = False):
+-    digits, target = dt.load_digits(n_class=2, return_X_y=True)
+ 
+-    x_train, x_test, y_train, y_test = train_test_split(
+-        digits, target, test_size=.2, random_state=10
+-    )
+-
+-    x_train = np.hstack((np.ones((len(y_train), 1)), x_train))
+-    x_test = np.hstack((np.ones((len(y_test), 1)), x_test))
+-
+-    rand = np.random.RandomState(19)
+-    w = rand.uniform(-1, 1, x_train.shape[1]) * 1e-6
+-
+-    if flag_show_data:
+-        fig, ax = plt.subplots(
+-            nrows=1, ncols=10, figsize=(12, 4), 
+-            subplot_kw={"xticks": [], "yticks": [] }
+-        )
+-        for i in np.arange(10):
+-            ax[i].imshow(digits[i].reshape(8, 8))
+-        plt.show()
+-
+-    fig, ax = plt.subplots(nrows=3, ncols=1, figsize=(12, 4))
+-    for ind, alpha in enumerate((0, .7, .9)):
+-        w_history, y_history = gradient_descent(
+-            max_iterations=100,
+-            threshold=1e-4,
+-            w=w.copy(),
+-            obj_func=mse,
+-            grad_func=grad_mse,
+-            learning_rate=1e-6,
+-            momentum=alpha,
+-            params=(x_train, y_train)
+-        )
+-        plt.subplot(131 + ind)
+-        plt.plot(np.arange(y_history.size), y_history, color='green', 
+-                 label='Градиент')
+-
+-        w_history, y_history = newton_func(
+-            max_iterations=100,
+-            threshold=1e-4,
+-            w=w.copy(),
+-            obj_func=mse, 
+-            grad_func=grad_mse,
+-            hesse_func=hesse_mse,
+-            learning_rate=1e-6,
+-            params=(x_train, y_train)
+-        )
+-        plt.plot(np.arange(y_history.size), y_history, color='red', 
+-                 label='Ньютон')
+-        plt.legend()
+-        if ind == 1:
+-            plt.xlabel('Итерация')
+-        if ind == 0:
+-            plt.ylabel('Среднеквадратичная ошибка')
+-
+-        plt.title(f'Импульс = {alpha}\n')
+-    plt.show()
+-
+-
++# Press the green button in the gutter to run the script.
+ if __name__ == '__main__':
+-#    solve_fw_newton()
+-    main(True)
++    print_hi('PyCharm')
+ 
++# See PyCharm help at https://www.jetbrains.com/help/pycharm/

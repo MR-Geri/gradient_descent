@@ -146,10 +146,10 @@ def main(flag_show_data: bool = False):
     s1.on_changed(update_slider)
     s2.on_changed(update_slider)
     s3.on_changed(update_slider)
+    plt.show()
 
 
 if __name__ == '__main__':
     solve_fw_newton()
     main(False)
-    plt.show()
 

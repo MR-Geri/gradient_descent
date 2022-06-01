@@ -151,6 +151,6 @@ def main(flag_show_data: bool = False):
 
 
 if __name__ == '__main__':
-#    solve_fw_newton()
-    main(False)
+    solve_fw_newton()
+#    main(False)
 

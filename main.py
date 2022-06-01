@@ -63,7 +63,6 @@ def solve_fw_newton():
         plt.text(-25, 15, f'Скорость = {rate}', fontsize=13)
 
     fig.subplots_adjust(hspace=.5, wspace=.3)
-    plt.show()
 
 
 def show_main_graph(ax, w, momentum, learning_rate, params):
@@ -147,10 +146,10 @@ def main(flag_show_data: bool = False):
     s1.on_changed(update_slider)
     s2.on_changed(update_slider)
     s3.on_changed(update_slider)
-    plt.show()
 
 
 if __name__ == '__main__':
     solve_fw_newton()
-#    main(False)
+    main(False)
+    plt.show()
 

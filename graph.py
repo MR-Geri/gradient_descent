@@ -1,7 +1,7 @@
+from pprint import pprint
 import numpy as np
+from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
-
-from visual import init_graph
 
 
 class Graph:
@@ -26,7 +26,7 @@ class Graph:
         plt.colorbar(f_plot)
         self.draw_arrow((0, 0), 'yellow', (-5, -10), 'глобальный минимум')
 
-    def draw_graph(self, points) -> None:
+    def draw_graph_on_board(self, points) -> None:
         self.draw_board()
         plt.plot(points[:, 0], points[:, 1], marker='o', c='magenta')
         self.draw_arrow(points[-1], 'green', (-1, 7), 'минимум')
@@ -39,6 +39,14 @@ class Graph:
                     "arrowstyle": '<-',
                     "connectionstyle": 'angle3'
                 })
+
+    def draw_graph_on_ax(self, ax: Axes, points, color: str, label: str) -> None:
+        x, y = points
+        print(f'{x.size}\n{y.size}\n')
+        pprint(x)
+        print('\n\n\n')
+        pprint(y)
+        ax.plot(np.arange(y.size), y, color=color, label=label)
 
     def draw_arrow(self,
                    cord_point: tuple[float | int, float | int], color: str,
@@ -83,12 +91,16 @@ class Graph:
             f_history = np.vstack((f_history, self.function(cords_copy)))
 
             i += 1
-            diff = np.absolute(f_history[-1] - f_history[-2])
+            diff = self.calculate_diff(f_history[-1], f_history[-2])
 
         return w_history, f_history
 
     def is_pos_def(self, matrix_hesse):
         return np.all(np.linalg.eigvals(matrix_hesse) > 0)
+
+    @staticmethod
+    def calculate_diff(pred, pred_pred):
+        return np.absolute(pred - pred_pred)
 
     def newton(self,
                learning_rate: float,
@@ -105,6 +117,7 @@ class Graph:
             hesse = self.function_hesse(cords_copy)
             grad = self.function_grad(cords_copy)
             if self.is_pos_def(hesse):
+                print(1)
                 hesse_inverse = np.linalg.inv(hesse)
                 cords_copy -= learning_rate * np.dot(hesse_inverse, grad)
             else:
@@ -114,41 +127,58 @@ class Graph:
             f_history = np.vstack((f_history, self.function(cords_copy)))
 
             i += 1
-            diff = np.absolute(f_history[-1] - f_history[-2])
+            diff = self.calculate_diff(f_history[-1], f_history[-2])
 
         return w_history, f_history
 
-    def visualize(self):
-        cords = self.get_random_cords(-10, 10, 2)
-        fig, _ = plt.subplots(nrows=4, ncols=4, figsize=(54, 54))
-        learning_rates = [.05, .3, .7, .9]
-        ind = 1
 
-        for rate in learning_rates:
-            plt.subplot(2, 4, ind)
-            self.draw_graph(self.gradient_descent(
-                learning_rate=rate,
-                momentum=.5,
-                max_iterations=100,
-                threshold=1e-2,
-                cords_copy=cords.copy()
-            ))
-            plt.subplot(2, 4, ind+1)
-            self.draw_graph(self.newton(
-                learning_rate=rate,
-                max_iterations=100,
-                threshold=1e-2,
-                cords_copy=cords.copy()
-            ))
-            ind += 2
-            plt.text(-39, 12, f'Градиент', fontsize=13)
-            plt.text(-3, 12, f'Ньютон', fontsize=13)
-            plt.text(-25, 15, f'Скорость = {rate}', fontsize=13)
+class Paraboloid(Graph):
+    def __init__(self, board: tuple[np.ndarray, np.ndarray], params=None) -> None:
+        super().__init__(board, params)
 
-        fig.subplots_adjust(hspace=.5, wspace=.3)
+    def function(self, cords: np.ndarray):
+        return np.sum(cords * cords)
 
-if __name__ == "__main__":
-    tmp = Graph(init_graph())
-    tmp.visualize()
-    plt.show()
+    def function_grad(self, cords: np.ndarray):
+        return 2 * cords
+
+    def function_hesse(self, cords: np.ndarray):
+        return np.array(((2, 0), (0, 2))).transpose()
+
+
+class MSE(Graph):
+    def __init__(self, board: tuple[np.ndarray, np.ndarray], params=None) -> None:
+        super().__init__(board, params)
+
+    @staticmethod
+    def calculate_diff(pred, pred_pred):
+        return pred
+
+    def function(self, cords: np.ndarray):
+        o = np.sum(self.params[0] * cords, axis=1)
+
+        ind_1 = np.where(o > 0.5)
+        ind_0 = np.where(o <= 0.5)
+        o[ind_1] = 1
+        o[ind_0] = 0
+
+        mse = np.sum((self.params[1] - o) ** 2)
+        return mse / self.params[1].size
+
+    def function_grad(self, cords: np.ndarray):
+        rows, cols = self.params[0].shape
+
+        o = np.sum(self.params[0] * cords, axis=1)
+        diff = self.params[1] - o
+        diff = np.tile(diff.reshape((rows, 1)), (1, cols))
+        grad = -np.sum(diff * self.params[0], axis=0)
+        return grad
+
+    def function_hesse(self, cords: np.ndarray):
+        o = np.sum(self.params[0] * cords, axis=1)
+        ab = 2 * np.sum(self.params[0]) / len(self.params[0])
+        return np.array((
+            (2, ab),
+            (ab, 2 * np.sum(self.params[0] ** 2) / len(self.params[0]))
+        ))
 

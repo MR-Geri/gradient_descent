@@ -42,10 +42,6 @@ class Graph:
 
     def draw_graph_on_ax(self, ax: Axes, points, color: str, label: str) -> None:
         x, y = points
-        print(f'{x.size}\n{y.size}\n')
-        pprint(x)
-        print('\n\n\n')
-        pprint(y)
         ax.plot(np.arange(y.size), y, color=color, label=label)
 
     def draw_arrow(self,
@@ -143,7 +139,7 @@ class Paraboloid(Graph):
         return 2 * cords
 
     def function_hesse(self, cords: np.ndarray):
-        return np.array(((2, 0), (0, 2))).transpose()
+        return np.array(((2, 0), (0, 2)))
 
 
 class MSE(Graph):
@@ -154,31 +150,35 @@ class MSE(Graph):
     def calculate_diff(pred, pred_pred):
         return pred
 
-    def function(self, cords: np.ndarray):
-        o = np.sum(self.params[0] * cords, axis=1)
+    def function(self, cords: np.ndarray, temp_params = None):
+        params = self.params if temp_params is None else temp_params
+        o = np.sum(params[0] * cords, axis=1)
 
         ind_1 = np.where(o > 0.5)
         ind_0 = np.where(o <= 0.5)
         o[ind_1] = 1
         o[ind_0] = 0
 
-        mse = np.sum((self.params[1] - o) ** 2)
-        return mse / self.params[1].size
+        mse = np.sum((params[1] - o) ** 2)
+        return mse / params[1].size
 
     def function_grad(self, cords: np.ndarray):
         rows, cols = self.params[0].shape
 
         o = np.sum(self.params[0] * cords, axis=1)
-        diff = self.params[1] - o
-        diff = np.tile(diff.reshape((rows, 1)), (1, cols))
-        grad = -np.sum(diff * self.params[0], axis=0)
+        zn = self.params[1] - o
+
+        diff = np.tile(zn.reshape((rows, 1)), (1, cols))
+        grad = -2 * np.sum(diff * self.params[0], axis=0)
         return grad
 
     def function_hesse(self, cords: np.ndarray):
-        o = np.sum(self.params[0] * cords, axis=1)
-        ab = 2 * np.sum(self.params[0]) / len(self.params[0])
-        return np.array((
-            (2, ab),
-            (ab, 2 * np.sum(self.params[0] ** 2) / len(self.params[0]))
-        ))
+        hesse = 2 * np.sum([np.outer(i, i) for i in self.params[0]], axis=0)
+
+#        hesse = np.zeros((64, 64))
+#        for matrix in self.params[0]:
+#            tmp = np.array([[2 * i * j for j in matrix] for i in matrix])
+#            hesse += np.array(tmp)
+
+        return hesse
 

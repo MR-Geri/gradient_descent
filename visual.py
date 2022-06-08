@@ -15,8 +15,8 @@ class ViewMSE:
     def show_numbers(self, data):
         print(f'len_show={len(data)}\nshow={data}')
         _, ax = plt.subplots(
-            nrows=1, ncols=10, figsize=(12, 4), 
-            subplot_kw={"xticks": [], "yticks": [] }
+            nrows=1, ncols=10, figsize=(12, 4),
+            subplot_kw={"xticks": [], "yticks": []}
         )
         for i in np.arange(10):
             ax[i].imshow(data[i].reshape(8, 8))
@@ -37,64 +37,68 @@ class ViewMSE:
 #        x_train = np.hstack((np.ones((len(y_train), 1)), x_train))
 #        x_test = np.hstack((np.ones((len(y_test), 1)), x_test))
 
-#        _, ax = plt.subplot_mosaic([
-#            [0, 1, 2, 3], [0, 1, 2, 4], [0, 1, 2, 5]
-#        ])
+        _, ax = plt.subplot_mosaic([
+            [0, 1, 2, 3], [0, 1, 2, 4], [0, 1, 2, 5]
+        ])
 #
         self.graph.params = (x_train, y_train)
 
-        _, errors_newton = self.graph.newton(
-            learning_rate=1e-6,
-            max_iterations=100,
-            threshold=0.005,
-            cords_copy=cords_copy.copy()
-        )
-        print(f'len_newton={len(errors_newton)} last={errors_newton[-1]}')
-        _, errors_grad = self.graph.gradient_descent(
-            learning_rate=1e-6,
-            max_iterations=100,
-            momentum=0.7,
-            threshold=0.005,
-            cords_copy=cords_copy.copy()
-        )
-        print(f'len_grad={len(errors_grad)} last={errors_grad[-1]}')
+#        cords_newton, errors_newton = self.graph.newton(
+#            learning_rate=1e-6,
+#            max_iterations=100,
+#            threshold=0.005,
+#            cords_copy=cords_copy.copy()
+#        )
+#        print(f'len_newton={len(errors_newton)} {errors_newton}')
+#        cords_grad, errors_grad = self.graph.gradient_descent(
+#            learning_rate=1e-6,
+#            max_iterations=100,
+#            momentum=0.7,
+#            threshold=0.005,
+#            cords_copy=cords_copy.copy()
+#        )
+#        print(f'len_grad={len(errors_grad)} {errors_grad}')
+#        self.graph.params = (x_test, y_test)
+#        print(f'{self.graph.function(cords_grad[-1])}')
 
-#        for ind, rate in enumerate((1e-6, 1e-7, 1e-8)):
-#            ax[ind].clear()
-#            self.graph.draw_graph_on_ax(
-#                ax[ind],
-#                self.graph.gradient_descent(
-#                    learning_rate=rate,
-#                    momentum=0.9,
-#                    max_iterations=100,
-#                    threshold=1e-2,
-#                    cords_copy=cords_copy.copy()
-#                ),
-#                'green',
-#                'Градиент'
-#            )
-#            self.graph.draw_graph_on_ax(
-#                ax[ind],
-#                self.graph.newton(
-#                    learning_rate=rate,
-#                    max_iterations=100,
-#                    threshold=1e-2,
-#                    cords_copy=cords_copy.copy()
-#                ),
-#                'red',
-#                'Ньютон'
-#            )
-#            ax[ind].legend()
+        for ind, rate in enumerate((1e-6, 1e-7, 1e-8)):
+            ax[ind].clear()
+            cords_grad, f_grad = self.graph.gradient_descent(
+                learning_rate=rate,
+                momentum=0.7,
+                max_iterations=100,
+                threshold=0.005,
+                cords_copy=cords_copy.copy()
+            )
+            self.graph.draw_graph_on_ax(
+                ax[ind],
+                (cords_grad, f_grad),
+                'green',
+                'Градиент'
+            )
+            cords_newton, f_newton = self.graph.newton(
+                learning_rate=rate,
+                max_iterations=100,
+                threshold=0.005,
+                cords_copy=cords_copy.copy()
+            )
+            self.graph.draw_graph_on_ax(
+                ax[ind],
+                (cords_newton, f_newton),
+                'red',
+                'Ньютон'
+            )
+            ax[ind].set_title(f'Скорость = {rate}')
+            ax[ind].legend()
+            print(
+                f'grad='
+                f'{self.graph.function(cords_grad[-1], (x_test, y_test))}'
+            )
+            print(
+                f'newton='
+                f'{self.graph.function(cords_newton[-1], (x_test, y_test))}'
+            )
 
-#        for ind, momentum in enumerate((0, .7, .9)):
-#            show_main_graph(ax[ind], w.copy(), momentum, 1e-6, (x_train, y_train))
-#            if ind == 1:
-#                ax[ind].set_xlabel('Итерация')
-#            if ind == 0:
-#                ax[ind].set_ylabel('Среднеквадратичная ошибка')
-#
-#            ax[ind].set_title(f'Импульс = {momentum}\n')
-#
 #        s1 = Slider(ax[3], '[1]', 1e-9, 1e-6, 1e-6)
 #        s2 = Slider(ax[4], '[2]', 1e-9, 1e-6, 1e-6)
 #        s3 = Slider(ax[5], '[3]', 1e-9, 1e-6, 1e-6)
@@ -102,6 +106,7 @@ class ViewMSE:
 #        s2.on_changed(update_slider)
 #        s3.on_changed(update_slider)
         plt.show()
+
 
 class ViewParabaloid:
     def __init__(self):
@@ -169,8 +174,8 @@ def draw_plot(pts, f_val) -> None:
 
 
 if __name__ == '__main__':
-#    pts, f_vals = init_graph()
-#    draw_plot(pts, f_vals)
-#    plt.show()
+    #    pts, f_vals = init_graph()
+    #    draw_plot(pts, f_vals)
+    #    plt.show()
     ViewMSE().show()
 

@@ -1,19 +1,33 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider
 import sklearn.datasets as dt
 from sklearn.model_selection import train_test_split
 
-from graph import Paraboloid, MSE
+from graph import Paraboloid, MSE, init_graph
+from dataclasses import dataclass 
+
+
+@dataclass
+class Data:
+    x: np.ndarray
+    y: np.ndarray
+
+    def get(self):
+        return self.x, self.y
 
 
 class ViewMSE:
     def __init__(self):
-        self.graph = MSE(init_graph())
-        self.sliders = []
+        self.graph = MSE(tuple())
+        digits, target = dt.load_digits(n_class=2, return_X_y=True)
+
+        x_train, x_test, y_train, y_test = train_test_split(
+            digits, target, test_size=.2, random_state=10
+        )
+        self.train = Data(x_train, y_train)
+        self.test = Data(x_test, y_test)
 
     def show_numbers(self, data):
-        print(f'len_show={len(data)}\nshow={data}')
         _, ax = plt.subplots(
             nrows=1, ncols=10, figsize=(12, 4),
             subplot_kw={"xticks": [], "yticks": []}
@@ -22,26 +36,19 @@ class ViewMSE:
             ax[i].imshow(data[i].reshape(8, 8))
 
     def show(self):
-        digits, target = dt.load_digits(n_class=2, return_X_y=True)
-
-        x_train, x_test, y_train, y_test = train_test_split(
-            digits, target, test_size=.2, random_state=10
-        )
-
         cords_copy = self.graph.get_random_cords(
-            -1, 1, x_train.shape[1]
+            -1, 1, self.train.x.shape[1]
         ) * 1e-6
 
-#        self.show_numbers(x_train)
-
-#        x_train = np.hstack((np.ones((len(y_train), 1)), x_train))
-#        x_test = np.hstack((np.ones((len(y_test), 1)), x_test))
+#        self.show_numbers(self.train.x)
 
         _, ax = plt.subplot_mosaic([
-            [0, 1, 2, 3], [0, 1, 2, 4], [0, 1, 2, 5]
+            [0, 1, 2]
         ])
 #
-        self.graph.params = (x_train, y_train)
+        self.graph.params = self.train.get()
+        self.graph.analize_hesse()
+        input()
 
 #        cords_newton, errors_newton = self.graph.newton(
 #            learning_rate=1e-6,
@@ -92,26 +99,19 @@ class ViewMSE:
             ax[ind].legend()
             print(
                 f'grad='
-                f'{self.graph.function(cords_grad[-1], (x_test, y_test))}'
+                f'{self.graph.function(cords_grad[-1], self.test.get())}'
             )
             print(
                 f'newton='
-                f'{self.graph.function(cords_newton[-1], (x_test, y_test))}'
+                f'{self.graph.function(cords_newton[-1], self.test.get())}'
             )
 
-#        s1 = Slider(ax[3], '[1]', 1e-9, 1e-6, 1e-6)
-#        s2 = Slider(ax[4], '[2]', 1e-9, 1e-6, 1e-6)
-#        s3 = Slider(ax[5], '[3]', 1e-9, 1e-6, 1e-6)
-#        s1.on_changed(update_slider)
-#        s2.on_changed(update_slider)
-#        s3.on_changed(update_slider)
         plt.show()
 
 
-class ViewParabaloid:
+class ViewParaboloid:
     def __init__(self):
         self.graph = Paraboloid(init_graph())
-        self.sliders = []
 
     def show(self):
         cords = self.graph.get_random_cords(-10, 10, 2)
@@ -142,40 +142,4 @@ class ViewParabaloid:
 
         fig.subplots_adjust(hspace=.5, wspace=.3)
         plt.show()
-
-
-def init_graph():
-    x = np.linspace(-10.0, 10.0, 100)
-    y = np.linspace(-10.0, 10.0, 100)
-    w1, w2 = np.meshgrid(x, y)
-    pts = np.vstack((w1.flatten(), w2.flatten()))
-    pts = pts.transpose()
-
-    f_vals = np.sum(pts * pts, axis=1)
-    return pts, f_vals
-
-
-def draw_arrowprops(text, xy, xytext, color) -> None:
-    plt.plot(xy=xy, marker='P', markersize=10, c=color)
-    plt.annotate(text, xy=xy, xytext=xytext,
-                 arrowprops={
-                     "arrowstyle": "->",
-                     "color": color,
-                     "connectionstyle": 'arc3'
-                 })
-
-
-def draw_plot(pts, f_val) -> None:
-    f_plot = plt.scatter(
-        pts[:, 0], pts[:, 1],
-        c=f_val, vmin=min(f_val), vmax=max(f_val), cmap='RdBu_r')
-    plt.colorbar(f_plot)
-    draw_arrowprops('глобальный минимум', (0, 0), (-5, -10), 'yellow')
-
-
-if __name__ == '__main__':
-    #    pts, f_vals = init_graph()
-    #    draw_plot(pts, f_vals)
-    #    plt.show()
-    ViewMSE().show()
 

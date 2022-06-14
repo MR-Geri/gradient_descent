@@ -1,4 +1,3 @@
-from pprint import pprint
 import numpy as np
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
@@ -24,7 +23,10 @@ class Graph:
             pts[:, 0], pts[:, 1],
             c=f_vals, vmin=min(f_vals), vmax=max(f_vals), cmap='RdBu_r')
         plt.colorbar(f_plot)
-        self.draw_arrow((0, 0), 'yellow', (-5, -10), 'глобальный минимум')
+        self.draw_arrow(
+            min(zip(*self.board), key=lambda x: x[1])[0],
+            'yellow', (-5, -10), 'глобальный минимум'
+        )
 
     def draw_graph_on_board(self, points) -> None:
         self.draw_board()
@@ -41,7 +43,7 @@ class Graph:
                 })
 
     def draw_graph_on_ax(self, ax: Axes, points, color: str, label: str) -> None:
-        x, y = points
+        _, y = points
         ax.plot(np.arange(y.size), y, color=color, label=label)
 
     def draw_arrow(self,
@@ -59,11 +61,15 @@ class Graph:
     def function(self, cords: np.ndarray):
         raise NotImplementedError("Обязательно к переопределению.")
 
-    def function_grad(self, cords: np.ndarray):
+    def function_derivative(self, cords: np.ndarray):
         raise NotImplementedError("Обязательно к переопределению.")
 
     def function_hesse(self, cords: np.ndarray):
         raise NotImplementedError("Обязательно к переопределению.")
+
+    @staticmethod
+    def calculate_diff(pred, pred_pred):
+        return np.absolute(pred - pred_pred)
 
     def gradient_descent(self,
                          learning_rate: float,
@@ -78,7 +84,7 @@ class Graph:
         i, diff = 0, 1e10
 
         while i < max_iterations and diff > threshold:
-            delta_w = -learning_rate * self.function_grad(
+            delta_w = -learning_rate * self.function_derivative(
                 cords_copy
             ) + momentum * delta_w
             cords_copy += delta_w
@@ -94,10 +100,6 @@ class Graph:
     def is_pos_def(self, matrix_hesse):
         return np.all(np.linalg.eigvals(matrix_hesse) > 0)
 
-    @staticmethod
-    def calculate_diff(pred, pred_pred):
-        return np.absolute(pred - pred_pred)
-
     def newton(self,
                learning_rate: float,
                max_iterations: int,
@@ -111,9 +113,8 @@ class Graph:
 
         while i < max_iterations and diff > threshold:
             hesse = self.function_hesse(cords_copy)
-            grad = self.function_grad(cords_copy)
+            grad = self.function_derivative(cords_copy)
             if self.is_pos_def(hesse):
-                print(1)
                 hesse_inverse = np.linalg.inv(hesse)
                 cords_copy -= learning_rate * np.dot(hesse_inverse, grad)
             else:
@@ -135,7 +136,7 @@ class Paraboloid(Graph):
     def function(self, cords: np.ndarray):
         return np.sum(cords * cords)
 
-    def function_grad(self, cords: np.ndarray):
+    def function_derivative(self, cords: np.ndarray):
         return 2 * cords
 
     def function_hesse(self, cords: np.ndarray):
@@ -154,15 +155,15 @@ class MSE(Graph):
         params = self.params if temp_params is None else temp_params
         o = np.sum(params[0] * cords, axis=1)
 
-        ind_1 = np.where(o > 0.5)
-        ind_0 = np.where(o <= 0.5)
-        o[ind_1] = 1
-        o[ind_0] = 0
+#        ind_1 = np.where(o > 0.5)
+#        ind_0 = np.where(o <= 0.5)
+#        o[ind_1] = 1
+#        o[ind_0] = 0
 
         mse = np.sum((params[1] - o) ** 2)
         return mse / params[1].size
 
-    def function_grad(self, cords: np.ndarray):
+    def function_derivative(self, cords: np.ndarray):
         rows, cols = self.params[0].shape
 
         o = np.sum(self.params[0] * cords, axis=1)
@@ -181,4 +182,22 @@ class MSE(Graph):
 #            hesse += np.array(tmp)
 
         return hesse
+    
+    def analize_hesse(self):
+        for i in self.params[0]:
+            matrix = 2 * np.outer(i, i)
+            hesse = list(np.linalg.eigvals(matrix) > 0)
+            value_false = len(list(filter(lambda x: not x, hesse)))
+            print(value_false)
+
+
+def init_graph():
+    x = np.linspace(-10.0, 10.0, 100)
+    y = np.linspace(-10.0, 10.0, 100)
+    w1, w2 = np.meshgrid(x, y)
+    pts = np.vstack((w1.flatten(), w2.flatten()))
+    pts = pts.transpose()
+
+    f_vals = np.sum(pts * pts, axis=1)
+    return pts, f_vals
 

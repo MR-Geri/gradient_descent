@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sklearn.datasets as dt
 from sklearn.model_selection import train_test_split
+from itertools import chain
 
 from graph import Paraboloid, MSE, init_graph
 from dataclasses import dataclass 
@@ -24,6 +25,8 @@ class ViewMSE:
         x_train, x_test, y_train, y_test = train_test_split(
             digits, target, test_size=.2, random_state=10
         )
+        x_train = self.alignment(x_train)
+        x_test = self.alignment(x_test)
         self.train = Data(x_train, y_train)
         self.test = Data(x_test, y_test)
 
@@ -32,8 +35,18 @@ class ViewMSE:
             nrows=1, ncols=10, figsize=(12, 4),
             subplot_kw={"xticks": [], "yticks": []}
         )
-        for i in np.arange(10):
+        for i in np.arange(-10, 0):
             ax[i].imshow(data[i].reshape(8, 8))
+
+    @staticmethod
+    def alignment(data: np.ndarray):
+#        first = np.sum(data[:,::8], axis=1)
+#        last = np.sum(data[:,7::8], axis=1)
+#        print('first', first == 0)
+#        print('last', last == 0)
+        del_index = list(range(0, 64, 8)) + list(range(7, 64, 8))
+        data = np.array([np.delete(i, del_index) for i in data])
+        return data
 
     def show(self):
         cords_copy = self.graph.get_random_cords(
@@ -47,8 +60,6 @@ class ViewMSE:
         ])
 #
         self.graph.params = self.train.get()
-        self.graph.analize_hesse()
-        input()
 
 #        cords_newton, errors_newton = self.graph.newton(
 #            learning_rate=1e-6,
@@ -68,10 +79,10 @@ class ViewMSE:
 #        self.graph.params = (x_test, y_test)
 #        print(f'{self.graph.function(cords_grad[-1])}')
 
-        for ind, rate in enumerate((1e-6, 1e-7, 1e-8)):
+        for ind, rate in enumerate((1e-1, 1e-2, 1e-3)):
             ax[ind].clear()
             cords_grad, f_grad = self.graph.gradient_descent(
-                learning_rate=rate,
+                learning_rate=1e-6,
                 momentum=0.7,
                 max_iterations=100,
                 threshold=0.005,

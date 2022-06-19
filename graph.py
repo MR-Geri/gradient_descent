@@ -114,7 +114,8 @@ class Graph:
         while i < max_iterations and diff > threshold:
             hesse = self.function_hesse(cords_copy)
             grad = self.function_derivative(cords_copy)
-            if self.is_pos_def(hesse):
+            if self.is_pos_def(hesse) and np.linalg.det(hesse) != 0:
+#                print('YES')
                 hesse_inverse = np.linalg.inv(hesse)
                 cords_copy -= learning_rate * np.dot(hesse_inverse, grad)
             else:
@@ -171,7 +172,7 @@ class MSE(Graph):
 
         diff = np.tile(zn.reshape((rows, 1)), (1, cols))
         grad = -2 * np.sum(diff * self.params[0], axis=0)
-        return grad
+        return grad / self.params[1].size
 
     def function_hesse(self, cords: np.ndarray):
         hesse = 2 * np.sum([np.outer(i, i) for i in self.params[0]], axis=0)
@@ -181,8 +182,8 @@ class MSE(Graph):
 #            tmp = np.array([[2 * i * j for j in matrix] for i in matrix])
 #            hesse += np.array(tmp)
 
-        return hesse
-    
+        return hesse / self.params[1].size
+ 
     def analize_hesse(self):
         for i in self.params[0]:
             matrix = 2 * np.outer(i, i)

@@ -36,7 +36,7 @@ class ViewMSE:
             subplot_kw={"xticks": [], "yticks": []}
         )
         for i in np.arange(-10, 0):
-            ax[i].imshow(data[i].reshape(8, 8))
+            ax[i].imshow(data[i].reshape(8, 6))
 
     @staticmethod
     def alignment(data: np.ndarray):
@@ -53,7 +53,7 @@ class ViewMSE:
             -1, 1, self.train.x.shape[1]
         ) * 1e-6
 
-#        self.show_numbers(self.train.x)
+        self.show_numbers(self.train.x)
 
         _, ax = plt.subplot_mosaic([
             [0, 1, 2]

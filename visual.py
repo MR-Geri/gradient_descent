@@ -49,51 +49,54 @@ class ViewMSE:
             -1, 1, self.train.x.shape[1]
         ) * 1e-6
 
-        self.show_numbers(self.train.x)
+#        self.show_numbers(self.train.x)
 
         _, ax = plt.subplot_mosaic([
-            [0, 1, 2]
+            [0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15]
         ])
 
         self.graph.params = self.train.get()
 
-        for ind, rate in enumerate((1e-1, 1e-2, 1e-3)):
-            ax[ind].clear()
-            cords_grad, f_grad = self.graph.gradient_descent(
-                learning_rate=1e-6,
-                momentum=0.7,
-                max_iterations=100,
-                threshold=0.005,
-                cords_copy=cords_copy.copy()
-            )
-            self.graph.draw_graph_on_ax(
-                ax[ind],
-                (cords_grad, f_grad),
-                'green',
-                'Градиент'
-            )
-            cords_newton, f_newton = self.graph.newton(
-                learning_rate=rate,
-                max_iterations=100,
-                threshold=0.005,
-                cords_copy=cords_copy.copy()
-            )
-            self.graph.draw_graph_on_ax(
-                ax[ind],
-                (cords_newton, f_newton),
-                'red',
-                'Ньютон'
-            )
-            ax[ind].set_title(f'Скорость = {rate}')
-            ax[ind].legend()
-            print(
-                f'grad='
-                f'{self.graph.function(cords_grad[-1], self.test.get())}'
-            )
-            print(
-                f'newton='
-                f'{self.graph.function(cords_newton[-1], self.test.get())}'
-            )
+        for ind_grad, rate_grad in enumerate(range(-4, -8, -1)):
+            for ind_newton, rate_newton in enumerate(range(-1, -5, -1)):
+                ax[ind_grad * 4 + ind_newton].clear()
+                cords_grad, f_grad = self.graph.gradient_descent(
+                    learning_rate=10 ** rate_grad,
+                    momentum=0.7,
+                    max_iterations=100,
+                    threshold=0.01,
+                    cords_copy=cords_copy.copy()
+                )
+                self.graph.draw_graph_on_ax(
+                    ax[ind_grad * 4 + ind_newton],
+                    (cords_grad, f_grad),
+                    'green',
+                    'Градиент'
+                )
+                cords_newton, f_newton = self.graph.newton(
+                    learning_rate=10 ** rate_newton,
+                    max_iterations=100,
+                    threshold=0.01,
+                    cords_copy=cords_copy.copy()
+                )
+                self.graph.draw_graph_on_ax(
+                    ax[ind_grad * 4 + ind_newton],
+                    (cords_newton, f_newton),
+                    'red',
+                    'Ньютон'
+                )
+                ax[ind_grad * 4 + ind_newton].set_title(
+                    f'Град = {rate_grad} Ньют = {rate_newton}')
+                ax[ind_grad * 4 + ind_newton].legend()
+                ax[ind_grad * 4 + ind_newton].set_xticklabels([])
+                print(
+                    f'grad[{len(f_grad)}]='
+                    f'{self.graph.function(cords_grad[-1], self.test.get())}'
+                )
+                print(
+                    f'newton[{len(f_newton)}]='
+                    f'{self.graph.function(cords_newton[-1], self.test.get())}'
+                )
 
         plt.show()
 

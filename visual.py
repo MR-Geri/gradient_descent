@@ -35,15 +35,11 @@ class ViewMSE:
             nrows=1, ncols=10, figsize=(12, 4),
             subplot_kw={"xticks": [], "yticks": []}
         )
-        for i in np.arange(-10, 0):
+        for i in np.arange(10):
             ax[i].imshow(data[i].reshape(8, 6))
 
     @staticmethod
     def alignment(data: np.ndarray):
-#        first = np.sum(data[:,::8], axis=1)
-#        last = np.sum(data[:,7::8], axis=1)
-#        print('first', first == 0)
-#        print('last', last == 0)
         del_index = list(range(0, 64, 8)) + list(range(7, 64, 8))
         data = np.array([np.delete(i, del_index) for i in data])
         return data
@@ -58,26 +54,8 @@ class ViewMSE:
         _, ax = plt.subplot_mosaic([
             [0, 1, 2]
         ])
-#
-        self.graph.params = self.train.get()
 
-#        cords_newton, errors_newton = self.graph.newton(
-#            learning_rate=1e-6,
-#            max_iterations=100,
-#            threshold=0.005,
-#            cords_copy=cords_copy.copy()
-#        )
-#        print(f'len_newton={len(errors_newton)} {errors_newton}')
-#        cords_grad, errors_grad = self.graph.gradient_descent(
-#            learning_rate=1e-6,
-#            max_iterations=100,
-#            momentum=0.7,
-#            threshold=0.005,
-#            cords_copy=cords_copy.copy()
-#        )
-#        print(f'len_grad={len(errors_grad)} {errors_grad}')
-#        self.graph.params = (x_test, y_test)
-#        print(f'{self.graph.function(cords_grad[-1])}')
+        self.graph.params = self.train.get()
 
         for ind, rate in enumerate((1e-1, 1e-2, 1e-3)):
             ax[ind].clear()

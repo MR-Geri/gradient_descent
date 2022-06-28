@@ -57,8 +57,8 @@ class ViewMSE:
 
         self.graph.params = self.train.get()
 
-        for ind_grad, rate_grad in enumerate(range(-4, -8, -1)):
-            for ind_newton, rate_newton in enumerate(range(-1, -5, -1)):
+        for ind_grad, rate_grad in enumerate(range(-7, -3)):
+            for ind_newton, rate_newton in enumerate(range(-4, 0)):
                 ax[ind_grad * 4 + ind_newton].clear()
                 cords_grad, f_grad = self.graph.gradient_descent(
                     learning_rate=10 ** rate_grad,

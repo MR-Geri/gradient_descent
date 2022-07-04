@@ -135,3 +135,26 @@ class ViewParaboloid:
         fig.subplots_adjust(hspace=.5, wspace=.3)
         plt.show()
 
+    def show_grad(self):
+        cords = self.graph.get_random_cords(-10, 10, 2)
+        fig, _ = plt.subplots(nrows=4, ncols=3, figsize=(54, 54))
+        ind = 1
+
+        for rate in (.05, .3, .7, .9):
+            for momentum in (0, .2, .7):
+                plt.subplot(4, 3, ind)
+                self.graph.draw_graph_on_board(self.graph.gradient_descent(
+                    learning_rate=rate,
+                    momentum=momentum,
+                    max_iterations=100,
+                    threshold=1e-2,
+                    cords_copy=cords.copy()
+                )[0])
+                if rate == .05:
+                    plt.text(-8, 20, f'Импульс = {momentum}', fontsize=15)
+                plt.text(-8, 12, f'Скорость = {rate}', fontsize=13)
+                ind += 1
+
+        fig.subplots_adjust(hspace=.5, wspace=.3)
+        plt.show()
+

@@ -1,7 +1,9 @@
 from visual import ViewMSE, ViewParaboloid
+from graph import Func
 
 
 if __name__ == '__main__':
-    ViewParaboloid().show_grad()
-#    ViewMSE().show()
+#    Func().draw_board()
+#    ViewParaboloid().show_grad()
+    ViewMSE().show()
 

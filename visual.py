@@ -4,7 +4,7 @@ import sklearn.datasets as dt
 from sklearn.model_selection import train_test_split
 from itertools import chain
 
-from graph import Paraboloid, MSE, init_graph
+from graph import Paraboloid, MSE
 from dataclasses import dataclass 
 
 
@@ -103,7 +103,7 @@ class ViewMSE:
 
 class ViewParaboloid:
     def __init__(self):
-        self.graph = Paraboloid(init_graph())
+        self.graph = Paraboloid()
 
     def show(self):
         cords = self.graph.get_random_cords(-10, 10, 2)
@@ -146,8 +146,8 @@ class ViewParaboloid:
                 self.graph.draw_graph_on_board(self.graph.gradient_descent(
                     learning_rate=rate,
                     momentum=momentum,
-                    max_iterations=100,
-                    threshold=1e-2,
+                    max_iterations=10,
+                    threshold=0.1,
                     cords_copy=cords.copy()
                 )[0])
                 if rate == .05:

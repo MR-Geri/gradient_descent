@@ -127,15 +127,43 @@ class Graph:
             i += 1
             diff = self.calculate_diff(f_history[-1], f_history[-2])
 
+        print(w_history[-1].reshape((8, 6)))
         return w_history, f_history
 
 
 class Paraboloid(Graph):
-    def __init__(self, board: tuple[np.ndarray, np.ndarray], params=None) -> None:
-        super().__init__(board, params)
+    def __init__(self, params=None) -> None:
+        x = np.linspace(-10.0, 10.0, 100)
+        y = np.linspace(-10.0, 10.0, 100)
+        w1, w2 = np.meshgrid(x, y)
+        pts = np.vstack((w1.flatten(), w2.flatten()))
+        pts = pts.transpose()
+        f_vals = np.sum(pts * pts, axis=1)
+        super().__init__((pts, f_vals), params)
 
     def function(self, cords: np.ndarray):
         return np.sum(cords * cords)
+
+    def function_derivative(self, cords: np.ndarray):
+        return 2 * cords
+
+    def function_hesse(self, cords: np.ndarray):
+        return np.array(((2, 0), (0, 2)))
+
+
+class Func(Graph):
+    def __init__(self, params=None) -> None:
+        x = np.linspace(-10.0, 10.0, 100)
+        y = np.linspace(-10.0, 10.0, 100)
+        w1, w2 = np.meshgrid(x, y)
+        pts = np.vstack((w1.flatten(), w2.flatten()))
+        pts = pts.transpose()
+
+        f_vals = -np.sinc(np.sqrt(np.sum((pts / np.pi) ** 2, axis=1)))
+        super().__init__((pts, f_vals), params)
+
+    def function(self, cords: np.ndarray):
+        return --np.sinc(np.sqrt(np.sum((cords / np.pi) ** 2, axis=1)))
 
     def function_derivative(self, cords: np.ndarray):
         return 2 * cords
@@ -190,15 +218,4 @@ class MSE(Graph):
             hesse = list(np.linalg.eigvals(matrix) > 0)
             value_false = len(list(filter(lambda x: not x, hesse)))
             print(value_false)
-
-
-def init_graph():
-    x = np.linspace(-10.0, 10.0, 100)
-    y = np.linspace(-10.0, 10.0, 100)
-    w1, w2 = np.meshgrid(x, y)
-    pts = np.vstack((w1.flatten(), w2.flatten()))
-    pts = pts.transpose()
-
-    f_vals = np.sum(pts * pts, axis=1)
-    return pts, f_vals
 

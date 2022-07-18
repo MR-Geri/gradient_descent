@@ -1,0 +1,15 @@
+1. local
+2. 
+3.
+4.
+5. http://www.mou.mipt.ru/Posobie2.pdf
+6. 
+7. 
+8. http://bedford-computing.co.uk/learning/wp-content/uploads/2015/10/Python-for-Data-Analysis.pdf
+9. https://devpractice.ru/files/books/python/Matplotlib.book.pdf
+10.
+11.
+12.
+13.
+14.
+15.

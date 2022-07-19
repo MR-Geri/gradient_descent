@@ -7,7 +7,7 @@
 7. 
 8. http://bedford-computing.co.uk/learning/wp-content/uploads/2015/10/Python-for-Data-Analysis.pdf
 9. https://devpractice.ru/files/books/python/Matplotlib.book.pdf
-10.
+10.https://www.studmed.ru/kashyap-rl-rao-ar-postroenie-dinamicheskih-stohasticheskih-modeley-po-eksperimentalnym-dannym_fcdeaf43481.html
 11.
 12.
 13.
